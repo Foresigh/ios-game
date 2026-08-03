@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>items</key>
+    <array>
+        <dict>
+            <key>assets</key>
+            <array>
+                <dict>
+                    <key>kind</key>
+                    <string>software-package</string>
+                    <!-- Direct https link to the .ipa (e.g. a GitHub Release asset URL) -->
+                    <key>url</key>
+                    <string>REPLACE_WITH_HTTPS_URL_TO_YOUR_IPA</string>
+                </dict>
+            </array>
+            <key>metadata</key>
+            <dict>
+                <!-- Must exactly match the app's bundle identifier / provisioning profile -->
+                <key>bundle-identifier</key>
+                <string>REPLACE_WITH_YOUR_BUNDLE_ID</string>
+                <!-- Match CFBundleShortVersionString from your Xcode target, e.g. "1.0" -->
+                <key>bundle-version</key>
+                <string>REPLACE_WITH_APP_VERSION</string>
+                <key>kind</key>
+                <string>software</string>
+                <!-- Name shown in the install confirmation prompt -->
+                <key>title</key>
+                <string>REPLACE_WITH_DISPLAY_NAME</string>
+            </dict>
+        </dict>
+    </array>
+</dict>
+</plist>

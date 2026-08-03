@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Install</title>
+<style>
+  html,body{ margin:0; height:100%; display:flex; align-items:center; justify-content:center;
+    background:#0d1220; font-family:-apple-system,"Helvetica Neue",Arial,sans-serif; }
+  .card{ text-align:center; padding:32px; }
+  h1{ color:#eaf2ff; font-size:22px; margin:0 0 8px; }
+  p{ color:#9aa8c2; font-size:14px; margin:0 0 24px; }
+  a.install{ display:inline-block; padding:14px 42px; border-radius:12px; text-decoration:none;
+    background:linear-gradient(180deg,#ffe488,#ffb524); color:#20160a; font-weight:bold;
+    font-size:18px; letter-spacing:1px; box-shadow:0 8px 24px rgba(255,170,20,.3); }
+  .note{ margin-top:22px; font-size:12px; color:#5c6a86; max-width:320px; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>Install the game</h1>
+    <p>Open this page in Safari on the iPad, then tap Install.</p>
+    <!--
+      Replace the url= value below with the https URL where manifest.plist
+      is hosted (e.g. your GitHub Pages URL for this repo).
+      This link only works from mobile Safari, not from another in-app
+      browser, and only over https.
+    -->
+    <a class="install" href="itms-services://?action=download-manifest&url=https://REPLACE_WITH_HTTPS_URL_TO_MANIFEST_PLIST">Install</a>
+    <div class="note">
+      The first launch will be blocked as an "Untrusted Developer" — go to
+      Settings &rarr; General &rarr; VPN &amp; Device Management, tap the
+      developer profile, and tap Trust.
+    </div>
+  </div>
+</body>
+</html>

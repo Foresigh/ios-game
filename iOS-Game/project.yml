@@ -1,0 +1,26 @@
+name: SignalRunner
+options:
+  bundleIdPrefix: com.REPLACE_ME
+  deploymentTarget:
+    iOS: "12.0"
+  createIntermediateGroups: true
+
+targets:
+  SignalRunner:
+    type: application
+    platform: iOS
+    deploymentTarget: "12.0"
+    sources:
+      - path: Sources
+    info:
+      path: Info.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.REPLACE_ME.signalrunner
+        PRODUCT_NAME: "Signal Runner"
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "2"          # iPad only. Use "1,2" to also allow iPhone.
+        CODE_SIGN_STYLE: Automatic
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+    scheme: {}

@@ -1,0 +1,60 @@
+workflows:
+  ios-adhoc:
+    name: Signal Runner - Ad Hoc
+    max_build_duration: 30
+    instance_type: mac_mini_m2
+    environment:
+      xcode: latest
+      vars:
+        # Must exactly match the bundle id you set in the Xcode project / App ID
+        BUNDLE_ID: "com.REPLACE_ME.signalrunner"
+        # The Xcode scheme name (matches your project's default scheme unless renamed)
+        XCODE_SCHEME: "SignalRunner"
+        # The .xcodeproj file name as created by the Xcode wizard
+        XCODE_PROJECT: "SignalRunner.xcodeproj"
+      groups:
+        # Create this group in Codemagic -> Team settings -> Environment variable groups,
+        # or just wire the App Store Connect API integration under
+        # Team settings -> Integrations -> Apple Developer Portal instead, which
+        # removes the need to manage this group manually.
+        - appstore_credentials
+
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+
+    scripts:
+      - name: Generate the Xcode project (XcodeGen)
+        script: |
+          brew install xcodegen
+          xcodegen generate --spec project.yml
+
+      - name: Set up code signing (Ad Hoc)
+        script: |
+          keychain initialize
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_ADHOC \
+            --create
+          keychain add-certificates
+          xcode-project use-profiles
+
+      - name: Build the .ipa
+        script: |
+          xcode-project build-ipa \
+            --project "$XCODE_PROJECT" \
+            --scheme "$XCODE_SCHEME"
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+
+    publishing:
+      email:
+        recipients:
+          - REPLACE_WITH_YOUR_EMAIL@example.com
+        notify:
+          success: true
+          failure: true

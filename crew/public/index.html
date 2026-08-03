@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CREWLINE</title>
+<style>
+  :root{ --bg0:#05070d; --ui:#eaf2ff; --sub:#8fa0c0; --accent:#ffd34d; --accent2:#6cf0ff;
+    --danger:#ff5b6e; --panel:rgba(10,14,26,.78); }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; height:100%; overflow:hidden; background:var(--bg0);
+    font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif; color:var(--ui); user-select:none; }
+  canvas{ display:block; }
+  .hidden{ display:none !important; }
+
+  .screen{ position:fixed; inset:0; display:flex; flex-direction:column; align-items:center;
+    justify-content:center; gap:14px; text-align:center; padding:24px;
+    background:radial-gradient(circle at 50% 35%, #1b2b52 0%, #080c16 70%); z-index:20; }
+  .screen h1{ font-size:44px; margin:0; letter-spacing:5px;
+    background:linear-gradient(180deg,#fff,#3fa0e0); -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent; }
+  .screen p.sub{ margin:0; opacity:.7; font-size:13px; letter-spacing:1px; }
+  input{ font:inherit; font-size:16px; padding:10px 14px; border-radius:10px; border:1px solid #ffffff30;
+    background:#ffffff10; color:#fff; text-align:center; width:220px; }
+  input::placeholder{ color:#8fa0c0; }
+  button{ cursor:pointer; font:inherit; font-size:16px; letter-spacing:1.5px; padding:11px 30px;
+    border-radius:10px; border:none; color:#0a1622; font-weight:bold;
+    background:linear-gradient(180deg,#9fe8ff,#3fa0e0); }
+  button.ghost{ background:transparent; border:1px solid #ffffff40; color:#fff; }
+  button:disabled{ opacity:.4; cursor:default; }
+  .row{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+  a.back{ position:absolute; left:18px; top:16px; color:#9aa8c2; font-size:13px; text-decoration:none; }
+  .err{ color:var(--danger); font-size:13px; min-height:18px; }
+  .code{ font-size:30px; letter-spacing:8px; font-weight:bold; color:var(--accent); }
+  #lobbyList{ list-style:none; padding:0; margin:0; font-size:14px; max-width:260px; }
+  #lobbyList li{ padding:4px 0; opacity:.9; }
+
+  #hud{ position:fixed; inset:0; pointer-events:none; z-index:5; }
+  .pill{ position:absolute; top:14px; background:var(--panel); border:1px solid rgba(255,255,255,.12);
+    border-radius:10px; padding:6px 14px; font-size:13px; pointer-events:auto; }
+  #roleTag{ left:14px; } #roleTag.crew b{ color:var(--accent2); } #roleTag.impostor b{ color:var(--danger); }
+  #taskProg{ right:14px; }
+  #actionBtn{ position:absolute; right:20px; bottom:26px; padding:16px 22px; border-radius:14px;
+    font-size:14px; pointer-events:auto; display:none; }
+  #meetingBtn{ position:absolute; left:20px; top:auto; bottom:26px; pointer-events:auto;
+    background:linear-gradient(180deg,#ffb0b0,#e04040); }
+  #toast{ position:absolute; left:50%; top:14%; transform:translateX(-50%); font-size:18px; letter-spacing:1px;
+    background:var(--panel); padding:8px 20px; border-radius:10px; opacity:0; transition:opacity .3s; }
+
+  #meetingUI{ position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+    background:rgba(5,7,13,.9); z-index:30; }
+  #meetingUI .box{ max-width:480px; width:92%; }
+  #meetingUI h2{ text-align:center; letter-spacing:2px; }
+  #timerBar{ height:8px; background:#ffffff20; border-radius:4px; overflow:hidden; margin-bottom:16px; }
+  #timerFill{ height:100%; background:var(--danger); width:100%; }
+  .voteRow{ display:flex; justify-content:space-between; align-items:center; background:#ffffff08;
+    border:1px solid #ffffff14; border-radius:10px; padding:10px 14px; margin-bottom:8px; }
+  .voteRow button{ padding:6px 16px; font-size:13px; }
+
+  #dpad{ position:fixed; left:22px; bottom:22px; width:150px; height:150px; display:none; pointer-events:auto; z-index:5; }
+  body.touch #dpad{ display:block; }
+  /* on touch layouts the dpad owns the bottom-left corner, so move the meeting call up out of its way */
+  body.touch #meetingBtn{ top:60px; bottom:auto; left:14px; }
+  .dbtn{ position:absolute; width:50px; height:50px; background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.3); border-radius:10px; display:flex; align-items:center; justify-content:center;
+    font-size:18px; pointer-events:auto; }
+  #dUp{ left:50px; top:0; } #dDown{ left:50px; top:100px; } #dLeft{ left:0; top:50px; } #dRight{ left:100px; top:50px; }
+</style>
+</head>
+<body>
+
+<div id="landing" class="screen">
+  <h1>CREWLINE</h1>
+  <p class="sub">ONLINE SOCIAL-DEDUCTION &middot; ORIGINAL GAME</p>
+  <input id="nameInput" placeholder="Your name" maxlength="16" />
+  <div class="row">
+    <button id="createBtn">CREATE ROOM</button>
+  </div>
+  <div class="row">
+    <input id="codeInput" placeholder="ROOM CODE" maxlength="4" style="text-transform:uppercase;" />
+    <button id="joinBtn" class="ghost">JOIN</button>
+  </div>
+  <div class="err" id="landingErr"></div>
+</div>
+
+<div id="lobby" class="screen hidden">
+  <a class="back" href="../index.html">&larr; ARCADE</a>
+  <h1>LOBBY</h1>
+  <div class="code" id="roomCode">----</div>
+  <p class="sub">share this code with friends</p>
+  <ul id="lobbyList"></ul>
+  <button id="startBtn">START GAME</button>
+  <p class="sub" id="lobbyHint">waiting for the host to start&hellip;</p>
+</div>
+
+<div id="end" class="screen hidden">
+  <h1 id="endTitle">GAME OVER</h1>
+  <p class="sub" id="endReason"></p>
+  <ul id="revealList" style="list-style:none;padding:0;font-size:14px;max-width:280px;"></ul>
+  <a class="back" href="../index.html" style="position:static;color:#fff;text-decoration:underline;">
+    Back to Arcade — create a new room to play again</a>
+</div>
+
+<canvas id="c"></canvas>
+<div id="hud" class="hidden">
+  <div class="pill" id="roleTag">ROLE <b>—</b></div>
+  <div class="pill" id="taskProg"></div>
+  <button id="meetingBtn" class="pill">CALL MEETING</button>
+  <button id="actionBtn"></button>
+  <div id="toast"></div>
+</div>
+
+<div id="dpad">
+  <div class="dbtn" id="dUp">&uarr;</div>
+  <div class="dbtn" id="dDown">&darr;</div>
+  <div class="dbtn" id="dLeft">&larr;</div>
+  <div class="dbtn" id="dRight">&rarr;</div>
+</div>
+
+<div id="meetingUI">
+  <div class="box">
+    <h2>EMERGENCY MEETING</h2>
+    <div id="timerBar"><div id="timerFill"></div></div>
+    <div id="voteList"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const el = id => document.getElementById(id);
+  const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+  if (isTouch) document.body.classList.add('touch');
+
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  const ws = new WebSocket(`${proto}://${location.host}/ws`);
+
+  let myId = null, myRole = null, MAP = null;
+  const others = new Map(); // id -> {name,x,y,alive}
+  const me = { x:0, y:0, tasks:[], tasksDone:[], killReadyAt:0 };
+  let phase = 'landing';
+
+  function toast(msg){
+    const t = el('toast'); t.textContent = msg; t.style.opacity = 1;
+    setTimeout(()=> t.style.opacity = 0, 2200);
+  }
+
+  /* ---------------- landing / lobby ---------------- */
+  el('createBtn').addEventListener('click', ()=>{
+    ws.send(JSON.stringify({ t:'create', name: el('nameInput').value }));
+  });
+  el('joinBtn').addEventListener('click', ()=>{
+    ws.send(JSON.stringify({ t:'join', name: el('nameInput').value, code: el('codeInput').value }));
+  });
+  el('startBtn').addEventListener('click', ()=> ws.send(JSON.stringify({ t:'start' })));
+
+  ws.addEventListener('open', ()=>{});
+  ws.addEventListener('close', ()=> toast('Disconnected from server.'));
+  ws.addEventListener('message', ev=>{
+    const msg = JSON.parse(ev.data);
+    switch (msg.t){
+      case 'joined':
+        myId = msg.id;
+        el('roomCode').textContent = msg.code;
+        el('landing').classList.add('hidden');
+        el('lobby').classList.remove('hidden');
+        phase = 'lobby';
+        break;
+      case 'error':
+        el('landingErr').textContent = msg.message;
+        break;
+      case 'lobby': {
+        const list = el('lobbyList'); list.innerHTML = '';
+        for (const p of msg.players){
+          const li = document.createElement('li');
+          li.textContent = p.name + (p.id===msg.hostId ? ' (host)' : '');
+          list.appendChild(li);
+        }
+        const isHost = msg.hostId === myId;
+        el('startBtn').style.display = isHost ? 'inline-block' : 'none';
+        el('lobbyHint').style.display = isHost ? 'none' : 'block';
+        break;
+      }
+      case 'role': {
+        myRole = msg.role; MAP = msg.map;
+        me.tasks = msg.tasks; me.tasksDone = [];
+        me.x = msg.you.x; me.y = msg.you.y;
+        break;
+      }
+      case 'started': {
+        phase = 'playing';
+        el('lobby').classList.add('hidden');
+        el('hud').classList.remove('hidden');
+        others.clear();
+        for (const p of msg.players){
+          if (p.id === myId) continue;
+          others.set(p.id, { name:p.name, x:p.x, y:p.y, alive:true });
+        }
+        el('roleTag').className = 'pill ' + myRole;
+        el('roleTag').innerHTML = 'ROLE <b>' + (myRole==='impostor'?'IMPOSTOR':'CREWMATE') + '</b>';
+        updateTaskHud();
+        break;
+      }
+      case 'pos': {
+        const o = others.get(msg.id); if (o){ o.x = msg.x; o.y = msg.y; }
+        break;
+      }
+      case 'taskDone': {
+        me.tasksDone.push(msg.id);
+        updateTaskHud();
+        toast('Task complete');
+        break;
+      }
+      case 'killed': {
+        if (msg.id === myId){ toast('You were eliminated.'); me.dead = true; }
+        const o = others.get(msg.id); if (o) o.alive = false;
+        break;
+      }
+      case 'left': {
+        others.delete(msg.id);
+        break;
+      }
+      case 'meeting': {
+        phase = 'meeting';
+        openMeeting(msg);
+        break;
+      }
+      case 'meetingResult': {
+        closeMeeting(msg);
+        phase = 'playing';
+        break;
+      }
+      case 'ended': {
+        phase = 'ended';
+        el('hud').classList.add('hidden');
+        el('meetingUI').style.display = 'none';
+        el('end').classList.remove('hidden');
+        el('endTitle').textContent = msg.winner==='crew' ? 'CREW WINS' : 'IMPOSTOR WINS';
+        el('endReason').textContent = msg.reason;
+        const rl = el('revealList'); rl.innerHTML='';
+        for (const r of msg.reveal){
+          const li = document.createElement('li');
+          li.textContent = `${r.name} — ${r.role.toUpperCase()}${r.alive?'':' (out)'}`;
+          rl.appendChild(li);
+        }
+        break;
+      }
+    }
+  });
+
+  function updateTaskHud(){
+    if (myRole === 'crew') el('taskProg').innerHTML = `TASKS <b>${me.tasksDone.length}</b>/${me.tasks.length}`;
+    else el('taskProg').innerHTML = `<b>SABOTAGE THE CREW</b>`;
+  }
+
+  /* ---------------- meeting UI ---------------- */
+  let meetingTimerHandle = null, votedAlready = false;
+  function openMeeting(msg){
+    votedAlready = false;
+    el('meetingUI').style.display = 'flex';
+    const list = el('voteList'); list.innerHTML = '';
+    for (const p of msg.players){
+      const row = document.createElement('div'); row.className = 'voteRow';
+      const label = document.createElement('span'); label.textContent = p.name + (p.id===myId?' (you)':'');
+      const btn = document.createElement('button'); btn.textContent = 'VOTE';
+      btn.disabled = p.id === myId;
+      btn.addEventListener('click', ()=>{
+        if (votedAlready) return; votedAlready = true;
+        ws.send(JSON.stringify({ t:'vote', targetId:p.id }));
+        [...list.querySelectorAll('button')].forEach(b=>b.disabled=true);
+      });
+      row.appendChild(label); row.appendChild(btn);
+      list.appendChild(row);
+    }
+    const skipRow = document.createElement('div'); skipRow.className='voteRow';
+    const skipBtn = document.createElement('button'); skipBtn.textContent = 'SKIP VOTE';
+    skipBtn.addEventListener('click', ()=>{
+      if (votedAlready) return; votedAlready = true;
+      ws.send(JSON.stringify({ t:'vote', targetId:'skip' }));
+      [...list.querySelectorAll('button')].forEach(b=>b.disabled=true);
+      skipBtn.disabled = true;
+    });
+    skipRow.appendChild(document.createTextNode('')); skipRow.appendChild(skipBtn);
+    list.appendChild(skipRow);
+
+    const dur = msg.endsAt - Date.now();
+    clearInterval(meetingTimerHandle);
+    meetingTimerHandle = setInterval(()=>{
+      const left = Math.max(0, msg.endsAt - Date.now());
+      el('timerFill').style.width = (left/dur*100)+'%';
+      if (left<=0) clearInterval(meetingTimerHandle);
+    }, 100);
+  }
+  function closeMeeting(msg){
+    el('meetingUI').style.display = 'none';
+    if (msg.ejected) toast(`${msg.ejected.name} was ejected — ${msg.ejected.role.toUpperCase()}`);
+    else toast('No one was ejected.');
+    if (msg.ejected){
+      if (msg.ejected.id === myId) me.dead = true;
+      const o = others.get(msg.ejected.id); if (o) o.alive = false;
+    }
+  }
+  el('meetingBtn').addEventListener('click', ()=>{
+    if (phase !== 'playing' || me.dead) return;
+    ws.send(JSON.stringify({ t:'meeting' }));
+  });
+
+  /* ---------------- movement + rendering ---------------- */
+  const canvas = el('c'), ctx = canvas.getContext('2d');
+  function resize(){ canvas.width = innerWidth; canvas.height = innerHeight; }
+  addEventListener('resize', resize); resize();
+
+  const keys = {};
+  addEventListener('keydown', e=>{ keys[e.code]=true; if (e.code==='KeyE') doAction(); if (e.code==='Space') e.preventDefault(); });
+  addEventListener('keyup', e=>{ keys[e.code]=false; });
+  const bindDpad = (id,dx,dy) => {
+    el(id).addEventListener('touchstart', e=>{ e.preventDefault(); dpad[id]=true; }, {passive:false});
+    el(id).addEventListener('touchend', e=>{ e.preventDefault(); dpad[id]=false; }, {passive:false});
+  };
+  const dpad = {};
+  bindDpad('dUp',0,-1); bindDpad('dDown',0,1); bindDpad('dLeft',-1,0); bindDpad('dRight',1,0);
+
+  let lastSend = 0, nearTask = null, nearTarget = null;
+  function updateAction(){
+    nearTask = null; nearTarget = null;
+    el('actionBtn').style.display = 'none';
+    if (phase !== 'playing' || me.dead || !MAP) return;
+
+    if (myRole === 'crew'){
+      for (const spot of MAP.taskSpots){
+        if (me.tasksDone.includes(spot.id)) continue;
+        if (Math.hypot(me.x-spot.x, me.y-spot.y) < 42){ nearTask = spot; break; }
+      }
+      if (nearTask){ el('actionBtn').style.display='block'; el('actionBtn').textContent = 'E: '+nearTask.name; }
+    } else {
+      let closest = null, cd = 46;
+      for (const [id,o] of others){
+        if (!o.alive) continue;
+        const d = Math.hypot(me.x-o.x, me.y-o.y);
+        if (d < cd){ cd = d; closest = id; }
+      }
+      if (closest){
+        nearTarget = closest;
+        const ready = Date.now() >= (me.killReadyAt||0);
+        el('actionBtn').style.display = 'block';
+        el('actionBtn').textContent = ready ? 'E: Eliminate' : 'On cooldown';
+        el('actionBtn').disabled = !ready;
+      }
+    }
+  }
+  function doAction(){
+    if (phase !== 'playing' || me.dead) return;
+    if (nearTask) ws.send(JSON.stringify({ t:'task', id: nearTask.id }));
+    else if (nearTarget && Date.now() >= (me.killReadyAt||0)){
+      ws.send(JSON.stringify({ t:'kill', targetId: nearTarget }));
+      me.killReadyAt = Date.now() + 22000;
+    }
+  }
+  el('actionBtn').addEventListener('click', doAction);
+
+  let last = performance.now();
+  function frame(now){
+    requestAnimationFrame(frame);
+    const dt = Math.min(0.05, (now-last)/1000); last = now;
+
+    if (phase === 'playing' && !me.dead && MAP){
+      let mx=0, mz=0;
+      if (keys.KeyW||keys.ArrowUp||dpad.dUp) mz-=1;
+      if (keys.KeyS||keys.ArrowDown||dpad.dDown) mz+=1;
+      if (keys.KeyA||keys.ArrowLeft||dpad.dLeft) mx-=1;
+      if (keys.KeyD||keys.ArrowRight||dpad.dRight) mx+=1;
+      const len = Math.max(1, Math.hypot(mx,mz)); mx/=len; mz/=len;
+      me.x = Math.max(20, Math.min(MAP.width-20, me.x + mx*160*dt));
+      me.y = Math.max(20, Math.min(MAP.height-20, me.y + mz*160*dt));
+      updateAction();
+
+      if (now - lastSend > 60){ lastSend = now; ws.send(JSON.stringify({ t:'move', x: me.x, y: me.y })); }
+    }
+    draw();
+  }
+  requestAnimationFrame(frame);
+
+  function draw(){
+    ctx.fillStyle = '#0c0f1a';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    if (!MAP) return;
+
+    const scale = Math.min(canvas.width/MAP.width, canvas.height/MAP.height) * 0.92;
+    const ox = (canvas.width - MAP.width*scale)/2, oy = (canvas.height - MAP.height*scale)/2;
+    const tx = x => ox + x*scale, ty = y => oy + y*scale;
+
+    ctx.fillStyle = '#171c2e';
+    for (const r of MAP.corridors) ctx.fillRect(tx(r.x), ty(r.y), r.w*scale, r.h*scale);
+    for (const r of MAP.rooms){
+      ctx.fillStyle = '#1c2338';
+      ctx.fillRect(tx(r.x), ty(r.y), r.w*scale, r.h*scale);
+      ctx.strokeStyle = '#3a4568'; ctx.lineWidth = 2;
+      ctx.strokeRect(tx(r.x), ty(r.y), r.w*scale, r.h*scale);
+    }
+    for (const spot of MAP.taskSpots){
+      const done = me.tasksDone && me.tasksDone.includes(spot.id);
+      ctx.fillStyle = done ? '#3a4568' : '#ffd34d';
+      ctx.beginPath(); ctx.arc(tx(spot.x), ty(spot.y), 8, 0, 7); ctx.fill();
+    }
+
+    for (const [id,o] of others){
+      if (!o.alive) continue;
+      drawPlayer(tx(o.x), ty(o.y), '#6cc0e0', o.name);
+    }
+    if (!me.dead) drawPlayer(tx(me.x), ty(me.y), myRole==='impostor' ? '#ff5b6e' : '#ffd34d', 'you');
+  }
+  function drawPlayer(x,y,color,label){
+    ctx.fillStyle = 'rgba(0,0,0,.35)';
+    ctx.beginPath(); ctx.ellipse(x,y+12,12,4,0,0,7); ctx.fill();
+    ctx.fillStyle = color;
+    ctx.beginPath(); ctx.arc(x,y,11,0,7); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.font = '11px sans-serif'; ctx.textAlign='center';
+    ctx.fillText(label, x, y-16);
+  }
+})();
+</script>
+</body>
+</html>

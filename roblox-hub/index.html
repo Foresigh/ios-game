@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>BUILD WORLD</title>
+<style>
+  :root{ --bg0:#05070d; --ui:#eaf2ff; --sub:#8fa0c0; --accent:#ffd34d;
+    --card:rgba(255,255,255,.04); --cardBorder:rgba(255,255,255,.09); }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; min-height:100%; background:
+    radial-gradient(circle at 80% -10%, #4a2e12 0%, transparent 55%),
+    radial-gradient(circle at 0% 0%, #2a1b45 0%, transparent 45%), var(--bg0);
+    font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif; color:var(--ui); }
+  header{ padding:44px 6vw 16px; text-align:center; position:relative; }
+  a.back{ position:absolute; left:18px; top:18px; color:#9aa8c2; font-size:13px; text-decoration:none;
+    letter-spacing:1px; }
+  header h1{ margin:0; font-size:clamp(30px,5.5vw,50px); letter-spacing:5px;
+    background:linear-gradient(180deg,#fff,#e0a038); -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent; }
+  header p{ margin:8px 0 0; color:var(--sub); font-size:13px; letter-spacing:2px; }
+  main{ max-width:900px; margin:0 auto; padding:20px 6vw 60px; }
+  .grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:20px; }
+  .card{ border-radius:18px; border:1px solid var(--cardBorder); background:var(--card);
+    overflow:hidden; text-decoration:none; color:inherit; display:block;
+    transition:transform .18s ease, border-color .18s ease; }
+  .card:hover{ transform:translateY(-4px); border-color:rgba(255,255,255,.22); }
+  .art{ height:120px; display:flex; align-items:center; justify-content:center; font-size:50px; }
+  .body{ padding:16px 18px 20px; }
+  .body h3{ margin:0 0 4px; font-size:16px; }
+  .body p{ margin:0; font-size:12.5px; color:var(--sub); line-height:1.5; }
+  .tag{ display:inline-block; margin-top:10px; font-size:10.5px; letter-spacing:1px; padding:3px 9px;
+    border-radius:20px; background:rgba(255,255,255,.08); color:var(--sub); }
+  .art.obby{ background:linear-gradient(160deg,#3a6b8f,#6cc0e0); }
+  .art.maze{ background:linear-gradient(160deg,#6b3a8f,#c06ce0); }
+  footer{ text-align:center; padding:10px 20px 50px; color:#5c6a86; font-size:11px; }
+</style>
+</head>
+<body>
+<header>
+  <a class="back" href="../index.html">&larr; ARCADE</a>
+  <h1>BUILD WORLD</h1>
+  <p>A LITTLE HUB OF ITS OWN</p>
+</header>
+<main>
+  <div class="grid">
+    <a class="card" href="obby.html">
+      <div class="art obby">🧗</div>
+      <div class="body">
+        <h3>SKYRISE OBBY</h3>
+        <p>Jump your way up a floating obstacle tower. Fall and respawn at your last checkpoint.</p>
+        <span class="tag">OFFLINE · SOLO</span>
+      </div>
+    </a>
+    <a class="card" href="maze.html">
+      <div class="art maze">🪙</div>
+      <div class="body">
+        <h3>COIN MAZE</h3>
+        <p>A fresh procedural maze every run — grab every coin and find the exit.</p>
+        <span class="tag">OFFLINE · SOLO</span>
+      </div>
+    </a>
+  </div>
+</main>
+<footer>More rooms get added here over time.</footer>
+</body>
+</html>

@@ -3,6 +3,10 @@ workflows:
     name: Signal Runner - Ad Hoc
     max_build_duration: 30
     instance_type: mac_mini_m2
+    integrations:
+      # Name of the App Store Connect API key integration set up under
+      # Codemagic -> Team settings -> Integrations -> Apple Developer Portal.
+      app_store_connect: ios-game
     environment:
       xcode: latest
       vars:
@@ -12,12 +16,6 @@ workflows:
         XCODE_SCHEME: "SignalRunner"
         # The .xcodeproj file name as created by the Xcode wizard
         XCODE_PROJECT: "SignalRunner.xcodeproj"
-      groups:
-        # Create this group in Codemagic -> Team settings -> Environment variable groups,
-        # or just wire the App Store Connect API integration under
-        # Team settings -> Integrations -> Apple Developer Portal instead, which
-        # removes the need to manage this group manually.
-        - appstore_credentials
 
     triggering:
       events:
@@ -54,7 +52,7 @@ workflows:
     publishing:
       email:
         recipients:
-          - REPLACE_WITH_YOUR_EMAIL@example.com
+          - fayisa23@gmail.com
         notify:
           success: true
           failure: true

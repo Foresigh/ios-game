@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>TV REMOTE</title>
+<style>
+  :root{ --ui:#eaf2ff; --sub:#8fa0c0; --accent:#6cf0ff; --panel:rgba(255,255,255,.05);
+    --border:rgba(255,255,255,.12); }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ margin:0; min-height:100%; background:#0a0e18;
+    font-family:-apple-system,"Trebuchet MS","Segoe UI",system-ui,sans-serif; color:var(--ui);
+    user-select:none; }
+  .wrap{ max-width:420px; margin:0 auto; padding:20px 18px 50px; }
+  h1{ font-size:20px; letter-spacing:3px; text-align:center; margin:18px 0 4px;
+    background:linear-gradient(180deg,#fff,#6cf0ff); -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent; }
+  .sub{ text-align:center; color:var(--sub); font-size:12px; letter-spacing:1px; margin-bottom:24px; }
+  .card{ background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:22px; }
+  label{ display:block; font-size:12px; color:var(--sub); margin-bottom:6px; letter-spacing:.5px; }
+  input{ width:100%; background:#0d1220; border:1px solid var(--border); border-radius:10px; color:var(--ui);
+    padding:12px 14px; font-size:16px; letter-spacing:1px; margin-bottom:14px; }
+  button{ cursor:pointer; font:inherit; border:none; border-radius:12px; color:#06121a; font-weight:bold;
+    background:linear-gradient(180deg,#9fe8ff,#3fa0e0); padding:13px 20px; font-size:15px; width:100%; }
+  button.secondary{ background:rgba(255,255,255,.08); color:var(--ui); }
+  .status{ text-align:center; font-size:12px; color:var(--sub); margin:10px 0 20px; letter-spacing:.5px; }
+  .status b{ color:var(--accent); }
+  .hidden{ display:none !important; }
+
+  .dpad{ position:relative; width:220px; height:220px; margin:10px auto 22px; }
+  .dbtn{ position:absolute; width:70px; height:70px; background:rgba(255,255,255,.07);
+    border:1px solid var(--border); border-radius:14px; display:flex; align-items:center; justify-content:center;
+    font-size:22px; color:var(--ui); }
+  .dbtn:active{ background:rgba(108,240,255,.25); }
+  #dUp{ left:75px; top:0; } #dDown{ left:75px; top:150px; } #dLeft{ left:0; top:75px; }
+  #dRight{ left:150px; top:75px; } #dCenter{ left:75px; top:75px; background:rgba(108,240,255,.14); }
+
+  .row{ display:flex; gap:10px; margin-bottom:10px; }
+  .row button{ flex:1; padding:16px 8px; font-size:20px; }
+  .row.small button{ font-size:13px; padding:12px 6px; letter-spacing:.5px; }
+  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>TV REMOTE</h1>
+  <div class="sub">CONTROLS YOUR GOOGLE TV OVER WI-FI</div>
+
+  <div id="authCard" class="card">
+    <label>Access code (shown in the relay's console on your PC)</label>
+    <input id="codeInput" placeholder="e.g. A1B2C3D4" autocapitalize="characters" />
+    <button id="authBtn">UNLOCK</button>
+  </div>
+
+  <div id="connectCard" class="card hidden">
+    <label>Your TV's local IP address (Settings &rarr; Network on the TV)</label>
+    <input id="hostInput" placeholder="e.g. 192.168.1.42" inputmode="decimal" />
+    <button id="connectBtn">PAIR / CONNECT</button>
+    <div class="sub" style="margin-top:14px;text-align:left;">
+      First time only: the TV will show a pairing code on screen after you tap Connect.
+    </div>
+  </div>
+
+  <div id="pairCard" class="card hidden">
+    <label>Enter the code shown on your TV screen</label>
+    <input id="pinInput" placeholder="123456" inputmode="numeric" />
+    <button id="pinBtn">SUBMIT CODE</button>
+  </div>
+
+  <div id="remoteCard" class="hidden">
+    <div class="status" id="statusLine">connecting&hellip;</div>
+
+    <div class="dpad">
+      <div class="dbtn" id="dUp">&uarr;</div>
+      <div class="dbtn" id="dDown">&darr;</div>
+      <div class="dbtn" id="dLeft">&larr;</div>
+      <div class="dbtn" id="dRight">&rarr;</div>
+      <div class="dbtn" id="dCenter">OK</div>
+    </div>
+
+    <div class="row">
+      <button class="secondary" id="btnBack">&larr; BACK</button>
+      <button class="secondary" id="btnHome">HOME</button>
+      <button class="secondary" id="btnPower">&#9211; POWER</button>
+    </div>
+
+    <div class="row">
+      <button class="secondary" id="btnVolDown">VOL &minus;</button>
+      <button class="secondary" id="btnMute">MUTE</button>
+      <button class="secondary" id="btnVolUp">VOL +</button>
+    </div>
+
+    <div class="row small">
+      <button class="secondary" id="btnPrev">&#9198; PREV</button>
+      <button class="secondary" id="btnPlay">&#9199; PLAY/PAUSE</button>
+      <button class="secondary" id="btnNext">&#9197; NEXT</button>
+    </div>
+
+    <div class="grid2">
+      <button class="secondary" id="btnYoutube">OPEN YOUTUBE</button>
+      <button class="secondary" id="btnSettings">SETTINGS</button>
+    </div>
+
+    <button class="secondary" id="btnChangeTV" style="margin-top:16px;opacity:.6;">
+      Pair a different TV
+    </button>
+  </div>
+</div>
+
+<script>
+(function(){
+  const el = id => document.getElementById(id);
+  let ws = null, authed = false;
+
+  function connectWS(){
+    const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+    ws = new WebSocket(`${proto}://${location.host}/ws`);
+    ws.onopen = () => {
+      const saved = localStorage.getItem('remoteAccessCode');
+      if (saved) sendAuth(saved);
+    };
+    ws.onmessage = e => handle(JSON.parse(e.data));
+    ws.onclose = () => { setTimeout(connectWS, 1500); };
+  }
+  function send(obj){ if (ws && ws.readyState===1) ws.send(JSON.stringify(obj)); }
+  function sendAuth(code){ send({ t:'auth', code }); }
+
+  function showOnly(id){
+    ['authCard','connectCard','pairCard','remoteCard'].forEach(x=>{
+      el(x).classList.toggle('hidden', x!==id);
+    });
+  }
+
+  function handle(msg){
+    if (msg.t === 'auth'){
+      authed = msg.ok;
+      if (authed){
+        localStorage.setItem('remoteAccessCode', el('codeInput').value.trim().toUpperCase());
+        showOnly(msg.hasTV ? 'remoteCard' : 'connectCard');
+      } else {
+        el('codeInput').value=''; el('codeInput').placeholder='wrong code, try again';
+      }
+    }
+    else if (msg.t === 'hello'){
+      // nothing to do until authed
+    }
+    else if (msg.t === 'needCode'){
+      showOnly('pairCard');
+    }
+    else if (msg.t === 'ready'){
+      showOnly('remoteCard');
+    }
+    else if (msg.t === 'status'){
+      if (msg.connected) showOnly('remoteCard');
+      const vol = msg.volume ? `${msg.volume.level}/${msg.volume.maximum}${msg.volume.muted?' (muted)':''}` : '—';
+      el('statusLine').innerHTML = msg.connected
+        ? `connected &middot; volume <b>${vol}</b>${msg.currentApp? ' &middot; ' + msg.currentApp : ''}`
+        : (msg.pairing ? 'pairing&hellip;' : 'not connected');
+    }
+    else if (msg.t === 'unpaired'){
+      alert('This TV forgot the pairing — connect again.');
+      showOnly('connectCard');
+    }
+    else if (msg.t === 'error'){
+      console.error(msg.message);
+      el('statusLine').textContent = 'error: ' + msg.message;
+    }
+  }
+
+  el('authBtn').addEventListener('click', ()=> sendAuth(el('codeInput').value.trim()));
+  el('connectBtn').addEventListener('click', ()=>{
+    const host = el('hostInput').value.trim();
+    if (!host) return;
+    send({ t:'connectTV', host });
+    el('statusLine') && (el('statusLine').textContent = 'pairing…');
+    showOnly('remoteCard');
+    el('statusLine').textContent = 'pairing… watch the TV screen for a code';
+  });
+  el('pinBtn').addEventListener('click', ()=>{
+    send({ t:'code', code: el('pinInput').value.trim() });
+  });
+  el('btnChangeTV').addEventListener('click', ()=> showOnly('connectCard'));
+
+  const key = (code, hold=false) => send({ t:'key', code, hold });
+  el('dUp').addEventListener('click', ()=>key('KEYCODE_DPAD_UP'));
+  el('dDown').addEventListener('click', ()=>key('KEYCODE_DPAD_DOWN'));
+  el('dLeft').addEventListener('click', ()=>key('KEYCODE_DPAD_LEFT'));
+  el('dRight').addEventListener('click', ()=>key('KEYCODE_DPAD_RIGHT'));
+  el('dCenter').addEventListener('click', ()=>key('KEYCODE_DPAD_CENTER'));
+  el('btnBack').addEventListener('click', ()=>key('KEYCODE_BACK'));
+  el('btnHome').addEventListener('click', ()=>key('KEYCODE_HOME'));
+  el('btnPower').addEventListener('click', ()=> send({ t:'power' }));
+  el('btnVolUp').addEventListener('click', ()=>key('KEYCODE_VOLUME_UP'));
+  el('btnVolDown').addEventListener('click', ()=>key('KEYCODE_VOLUME_DOWN'));
+  el('btnMute').addEventListener('click', ()=>key('KEYCODE_MUTE'));
+  el('btnPrev').addEventListener('click', ()=>key('KEYCODE_MEDIA_PREVIOUS'));
+  el('btnPlay').addEventListener('click', ()=>key('KEYCODE_MEDIA_PLAY_PAUSE'));
+  el('btnNext').addEventListener('click', ()=>key('KEYCODE_MEDIA_NEXT'));
+  el('btnSettings').addEventListener('click', ()=>key('KEYCODE_SETTINGS'));
+  el('btnYoutube').addEventListener('click', ()=> send({ t:'openApp', app:'youtube' }));
+
+  connectWS();
+})();
+</script>
+</body>
+</html>

@@ -7,7 +7,7 @@ workflows:
       xcode: latest
       vars:
         # Must exactly match the bundle id you set in the Xcode project / App ID
-        BUNDLE_ID: "com.REPLACE_ME.signalrunner"
+        BUNDLE_ID: "com.kayi.signalrunner"
         # The Xcode scheme name (matches your project's default scheme unless renamed)
         XCODE_SCHEME: "SignalRunner"
         # The .xcodeproj file name as created by the Xcode wizard

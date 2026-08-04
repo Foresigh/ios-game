@@ -1,6 +1,6 @@
 name: SignalRunner
 options:
-  bundleIdPrefix: com.REPLACE_ME
+  bundleIdPrefix: com.kayi
   deploymentTarget:
     iOS: "12.0"
   createIntermediateGroups: true
@@ -16,7 +16,7 @@ targets:
       path: Info.plist
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.REPLACE_ME.signalrunner
+        PRODUCT_BUNDLE_IDENTIFIER: com.kayi.signalrunner
         PRODUCT_NAME: "Signal Runner"
         SWIFT_VERSION: "5.0"
         TARGETED_DEVICE_FAMILY: "2"          # iPad only. Use "1,2" to also allow iPhone.

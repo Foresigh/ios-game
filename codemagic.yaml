@@ -9,9 +9,14 @@ workflows:
       app_store_connect: ios-game
     environment:
       xcode: latest
+      # Declarative signing config: combined with the integrations block
+      # above, `xcode-project use-profiles` fetches/creates the matching
+      # certificate + Ad Hoc profile automatically — no manual
+      # `app-store-connect fetch-signing-files` call needed.
+      ios_signing:
+        distribution_type: ad_hoc
+        bundle_identifier: com.kayi.signalrunner
       vars:
-        # Must exactly match the bundle id you set in the Xcode project / App ID
-        BUNDLE_ID: "com.kayi.signalrunner"
         # The Xcode scheme name (matches your project's default scheme unless renamed)
         XCODE_SCHEME: "SignalRunner"
         # The .xcodeproj file name as created by the Xcode wizard
@@ -33,10 +38,6 @@ workflows:
       - name: Set up code signing (Ad Hoc)
         script: |
           keychain initialize
-          app-store-connect fetch-signing-files "$BUNDLE_ID" \
-            --type IOS_APP_ADHOC \
-            --create
-          keychain add-certificates
           xcode-project use-profiles
 
       - name: Build the .ipa

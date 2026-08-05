@@ -31,6 +31,16 @@ workflows:
           brew install xcodegen
           xcodegen generate --spec project.yml
 
+      - name: Configure signing settings
+        # NOTE: no `keychain initialize` here on purpose — Codemagic's own
+        # automatic "Set up code signing identities" step (triggered by
+        # environment.ios_signing) already created and populated the
+        # keychain with our certificate; re-initializing it here would wipe
+        # that out. This step only applies the profile to the project and
+        # writes export_options.plist, which build-ipa needs next.
+        script: |
+          xcode-project use-profiles
+
       - name: Build the .ipa
         script: |
           xcode-project build-ipa \

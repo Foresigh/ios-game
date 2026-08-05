@@ -31,11 +31,6 @@ workflows:
           brew install xcodegen
           xcodegen generate --spec project.yml
 
-      - name: Set up code signing (Ad Hoc)
-        script: |
-          keychain initialize
-          xcode-project use-profiles
-
       - name: Build the .ipa
         script: |
           xcode-project build-ipa \

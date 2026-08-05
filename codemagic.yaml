@@ -3,19 +3,12 @@ workflows:
     name: Signal Runner - Ad Hoc
     max_build_duration: 30
     instance_type: mac_mini_m2
-    integrations:
-      # Name of the App Store Connect API key integration set up under
-      # Codemagic -> Team settings -> Integrations -> Apple Developer Portal.
-      app_store_connect: ios-game
     environment:
       xcode: latest
-      # Declarative signing config: combined with the integrations block
-      # above, `xcode-project use-profiles` fetches/creates the matching
-      # certificate + Ad Hoc profile automatically — no manual
-      # `app-store-connect fetch-signing-files` call needed.
-      ios_signing:
-        distribution_type: ad_hoc
-        bundle_identifier: com.kayi.signalrunner
+      # No integrations/ios_signing block needed: the certificate and Ad Hoc
+      # profile were generated manually and imported into this Codemagic
+      # account's "Code signing identities" vault, so `xcode-project
+      # use-profiles` finds them there directly by matching bundle id.
       vars:
         # The Xcode scheme name (matches your project's default scheme unless renamed)
         XCODE_SCHEME: "SignalRunner"

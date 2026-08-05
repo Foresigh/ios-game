@@ -5,10 +5,13 @@ workflows:
     instance_type: mac_mini_m2
     environment:
       xcode: latest
-      # No integrations/ios_signing block needed: the certificate and Ad Hoc
-      # profile were generated manually and imported into this Codemagic
-      # account's "Code signing identities" vault, so `xcode-project
-      # use-profiles` finds them there directly by matching bundle id.
+      # Reference the certificate and Ad Hoc profile by the exact "Reference
+      # name" they were given under Team settings -> Code signing identities.
+      ios_signing:
+        certificates:
+          - signalrunner-distribution
+        provisioning_profiles:
+          - signalrunner-adhoc-profile
       vars:
         # The Xcode scheme name (matches your project's default scheme unless renamed)
         XCODE_SCHEME: "SignalRunner"

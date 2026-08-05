@@ -12,22 +12,22 @@
                     <string>software-package</string>
                     <!-- Direct https link to the .ipa (e.g. a GitHub Release asset URL) -->
                     <key>url</key>
-                    <string>REPLACE_WITH_HTTPS_URL_TO_YOUR_IPA</string>
+                    <string>https://github.com/Foresigh/ios-game/releases/download/v1.0.0/Signal_Runner.ipa</string>
                 </dict>
             </array>
             <key>metadata</key>
             <dict>
                 <!-- Must exactly match the app's bundle identifier / provisioning profile -->
                 <key>bundle-identifier</key>
-                <string>REPLACE_WITH_YOUR_BUNDLE_ID</string>
+                <string>com.kayi.signalrunner</string>
                 <!-- Match CFBundleShortVersionString from your Xcode target, e.g. "1.0" -->
                 <key>bundle-version</key>
-                <string>REPLACE_WITH_APP_VERSION</string>
+                <string>1.0</string>
                 <key>kind</key>
                 <string>software</string>
                 <!-- Name shown in the install confirmation prompt -->
                 <key>title</key>
-                <string>REPLACE_WITH_DISPLAY_NAME</string>
+                <string>Signal Runner</string>
             </dict>
         </dict>
     </array>

@@ -1,2 +1,5 @@
-/blockfall.html
-/index.html
+# Local certs/profiles/build artifacts — must never be committed to this public repo
+INPORTANT pass fAuvH0Vc/
+*.p12
+*.mobileprovision
+*.ipa

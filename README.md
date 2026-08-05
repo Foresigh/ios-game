@@ -16,6 +16,9 @@ roblox-hub/            BUILD WORLD — a mini-hub of its own
 crew/                  CREWLINE — online social-deduction game (needs a real server, see below)
   server.js             Node + WebSocket game server
   public/index.html      the game client, served by server.js
+remote/                TV REMOTE — utility, not a game (needs a real server too, see below)
+  server.js             Node relay speaking the real (unofficial) Google TV protocol
+  public/index.html      the remote-control client, served by server.js
 ```
 
 ## Running the static games (everything except Crewline)
@@ -83,6 +86,26 @@ at the real deployment instead of a local-only path.
   ejected (ties/skip majority eject no one).
 - Crew wins by finishing all tasks or ejecting every impostor; the impostor
   wins by reducing the crew to equal or fewer numbers.
+
+## Running TV Remote (controls a Google TV, not a game)
+
+Also a real Node process, same reason as Crewline — but this one is
+**deliberately not meant to be deployed publicly**. It controls a physical
+TV in your house over the local network using an unofficial, reverse-
+engineered protocol (via the community `androidtv-remote` package); it has
+no business being reachable from the internet.
+
+```
+cd remote
+npm install
+npm start
+```
+
+The console prints an access code on startup — enter that once in the web
+client (`http://<your-pc's-local-ip>:8791/` from the iPad, same Wi-Fi).
+Full pairing walkthrough is in `remote/README.md`. Keep this running only
+on a trusted home machine; don't port-forward it or put it behind a public
+host the way Crewline can be.
 
 ## Notes
 

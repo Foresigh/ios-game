@@ -4,7 +4,9 @@ workflows:
     max_build_duration: 30
     instance_type: mac_mini_m2
     environment:
-      xcode: latest
+      # Pinned: Xcode 26+ builds install on iOS 12 but crash at launch.
+      # 16.x is the last line that produces binaries iOS 12 can run.
+      xcode: 16.4
       # Reference the certificate and Ad Hoc profile by the exact "Reference
       # name" they were given under Team settings -> Code signing identities.
       ios_signing:

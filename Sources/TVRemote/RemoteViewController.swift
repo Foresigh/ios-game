@@ -204,7 +204,9 @@ final class RemoteViewController: UIViewController, UITextFieldDelegate {
     // MARK: - Screens
 
     private func show(_ panel: UIView?) {
-        [setupPanel, codePanel, remotePanel].forEach { $0?.isHidden = $0 !== panel }
+        for candidate in [setupPanel, codePanel, remotePanel] as [UIView] {
+            candidate.isHidden = candidate !== panel
+        }
         if panel == nil { spinner.startAnimating() } else { spinner.stopAnimating() }
     }
 

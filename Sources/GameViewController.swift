@@ -25,6 +25,16 @@ final class GameViewController: UIViewController {
         // Old A7/A8 GPUs: keep this off. It costs real frame time for no
         // gameplay benefit in a flat-shaded 2D scene like this one.
         skView.shouldCullNonVisibleNodes = true
+
+        let menu = ActionButton("‹ MENU", fontSize: 18) { [weak self] in self?.dismiss(animated: true) }
+        menu.translatesAutoresizingMaskIntoConstraints = false
+        skView.addSubview(menu)
+        NSLayoutConstraint.activate([
+            menu.trailingAnchor.constraint(equalTo: skView.trailingAnchor, constant: -20),
+            menu.topAnchor.constraint(equalTo: skView.topAnchor, constant: 20),
+            menu.widthAnchor.constraint(equalToConstant: 110),
+            menu.heightAnchor.constraint(equalToConstant: 44),
+        ])
     }
 
     override var prefersStatusBarHidden: Bool { true }

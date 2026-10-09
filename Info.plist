@@ -18,6 +18,8 @@
     <string>$(MARKETING_VERSION)</string>
     <key>CFBundleVersion</key>
     <string>$(CURRENT_PROJECT_VERSION)</string>
+    <key>NSLocalNetworkUsageDescription</key>
+    <string>The TV remote talks to your Google TV over your home Wi-Fi.</string>
     <key>LSRequiresIPhoneOS</key>
     <true/>
     <key>UIRequiresFullScreen</key>

@@ -37,11 +37,22 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
 
     private let groundHeightFraction: CGFloat = 0.22
 
+    // Jump tuning, all in points so it behaves the same on every screen size.
+    // SpriteKit treats 150 points as 1 metre for physicsWorld.gravity.
+    private let gravityMetres: CGFloat = 20
+    private var gravityPoints: CGFloat { gravityMetres * 150 }
+    /// Peak jump height as a fraction of screen height — comfortably above
+    /// the tallest obstacle (11%).
+    private let jumpHeightFraction: CGFloat = 0.30
+    private var jumpVelocity: CGFloat { sqrt(2 * gravityPoints * frame.height * jumpHeightFraction) }
+    /// How long one jump keeps the player off the ground.
+    private var airTime: TimeInterval { TimeInterval(2 * jumpVelocity / gravityPoints) }
+
     // MARK: - Setup
 
     override func didMove(to view: SKView) {
         backgroundColor = SKColor(red: 0.53, green: 0.75, blue: 0.94, alpha: 1)
-        physicsWorld.gravity = CGVector(dx: 0, dy: -9.2)
+        physicsWorld.gravity = CGVector(dx: 0, dy: -gravityMetres)
         physicsWorld.contactDelegate = self
         scaleMode = .resizeFill
 
@@ -141,8 +152,9 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
     private func jump() {
         guard onGround else { return }
         onGround = false
-        player.physicsBody?.velocity = CGVector(dx: 0, dy: 0)
-        player.physicsBody?.applyImpulse(CGVector(dx: 0, dy: frame.height * 0.11))
+        // Set the velocity directly: an impulse depends on the body's mass,
+        // which made the old jump launch the player clean off the screen.
+        player.physicsBody?.velocity = CGVector(dx: 0, dy: jumpVelocity)
     }
 
     // MARK: - Obstacles
@@ -191,7 +203,10 @@ final class GameScene: SKScene, SKPhysicsContactDelegate {
         obstacleTimer += dt
         if obstacleTimer >= nextObstacleInterval {
             obstacleTimer = 0
-            nextObstacleInterval = Double.random(in: 0.9...1.6) * (220.0 / Double(scrollSpeed))
+            // Always leave room to land after one jump and take off again
+            // before the next obstacle, however fast the scroll gets.
+            let landingRoom = TimeInterval(min(frame.width, frame.height) * 0.2 / scrollSpeed)
+            nextObstacleInterval = (airTime + landingRoom) * Double.random(in: 1.0...1.8)
             spawnObstacle()
         }
     }

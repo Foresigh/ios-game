@@ -16,8 +16,11 @@ final class MenuViewController: UIViewController {
         let remote = ActionButton("📺  TV REMOTE", fontSize: 26) { [weak self] in
             self?.open(RemoteViewController())
         }
+        let claude = ActionButton("💬  ASK CLAUDE", fontSize: 26) { [weak self] in
+            self?.open(ChatViewController())
+        }
 
-        let stack = UIStackView([title, subtitle, play, remote], axis: .vertical, spacing: 22)
+        let stack = UIStackView([title, subtitle, play, remote, claude], axis: .vertical, spacing: 22)
         stack.setCustomSpacing(8, after: title)
         stack.setCustomSpacing(40, after: subtitle)
         stack.translatesAutoresizingMaskIntoConstraints = false
@@ -29,6 +32,7 @@ final class MenuViewController: UIViewController {
             stack.widthAnchor.constraint(equalToConstant: 440),
             play.heightAnchor.constraint(equalToConstant: 84),
             remote.heightAnchor.constraint(equalToConstant: 84),
+            claude.heightAnchor.constraint(equalToConstant: 84),
         ])
     }
 

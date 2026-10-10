@@ -16,13 +16,16 @@ final class MenuViewController: UIViewController {
         let remote = ActionButton("📺  TV REMOTE", fontSize: 26) { [weak self] in
             self?.open(RemoteViewController())
         }
+        let horror = ActionButton("👁  THE HOUSE (HORROR)", fontSize: 26) { [weak self] in
+            self?.open(HorrorViewController())
+        }
         let claude = ActionButton("💬  ASK CLAUDE", fontSize: 26) { [weak self] in
             self?.open(ChatViewController())
         }
 
-        let stack = UIStackView([title, subtitle, play, remote, claude], axis: .vertical, spacing: 22)
+        let stack = UIStackView([title, subtitle, play, horror, remote, claude], axis: .vertical, spacing: 16)
         stack.setCustomSpacing(8, after: title)
-        stack.setCustomSpacing(40, after: subtitle)
+        stack.setCustomSpacing(28, after: subtitle)
         stack.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(stack)
 
@@ -33,6 +36,7 @@ final class MenuViewController: UIViewController {
             play.heightAnchor.constraint(equalToConstant: 84),
             remote.heightAnchor.constraint(equalToConstant: 84),
             claude.heightAnchor.constraint(equalToConstant: 84),
+            horror.heightAnchor.constraint(equalToConstant: 84),
         ])
     }
 
